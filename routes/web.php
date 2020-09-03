@@ -17,8 +17,15 @@ Route::get('/home', 'HomeController@index')->name('home');
 /*Proveedor */
 Route::post('/formRegistro/registro/insertProveedor', 'ProveedorController@insertProveedor')->name('insertProveedor');
 
+/*Persona */
+Route::get('/formRegistro/validacion/validarDni/{dni}', 'PersonaController@validarDni')->name('validarDni');
+
+/*Empresa */
+Route::get('/formRegistro/validacion/validarRuc/{ruc}', 'EmpresaController@validarRuc')->name('validarRuc');
+
+
 /*Mercados y sectores */
-Route::get('/formRegistro/mercados/listMercados', 'MercadoController@listMercados')->name('listMercados');
+Route::get('/formRegistro/mercados/listMercados/{dist}', 'MercadoController@listMercados')->name('listMercados');
 Route::get('/formRegistro/mercados/listSectoresMercados/{id}', 'MercadoController@listSectoresMercados')->name('listSectoresMercados');
 
 /*Categorias */ 

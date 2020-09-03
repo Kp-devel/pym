@@ -26,7 +26,7 @@
             </main>
         </div>
         <!-- Scripts -->
-        <script src="{{asset('js/app.js?4')}}" type="text/javascript"></script>
+        <script src="{{asset('js/app.js?8')}}" type="text/javascript"></script>
         <!-- <script src="{{asset('js/bootstrap-select.min.js')}}" type="text/javascript"></script> -->
     </body>
 </html>

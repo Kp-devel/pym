@@ -27,7 +27,7 @@ class Puesto extends Model
     public static function selectIdPuesto(Request $rq,$fecha){
         $direccion=$rq->v_dir;
         $idMercado=$rq->centro_trab;
-        $idSector=$rq->centro_trab_sector;
+        $idSector=isset($rq->centro_trab_sector)?$rq->centro_trab_sector:0;
         return DB::select(DB::raw("
             select idPuesto
             from puesto 

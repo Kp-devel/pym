@@ -1,24 +1,5 @@
 <template>
     <div >
-        <!-- <div  class="modal" tabindex="-1" role="dialog" id="modalCarga">
-            <div class="d-flex justify-content-center">
-                <div class="text-center" v-if="viewCarga">
-                    <div class="clearfix">
-                        <div class="spinner-border text-orange" style="width: 3rem; height: 3rem;" role="status">
-                            <span class="sr-only">Cargando...</span>
-                        </div>
-                    </div>
-                    <p class="font-25 text-white">Registrando datos...</p>
-                </div>
-                <div class="text-center" v-else>
-                    <i class="fa fa-check-circle fa-4x text-orange fadeInZoom mb-3"></i><br>
-                    <b class="font-20 text-white">¡Ya eres parte de Mercadito!</b><br>
-                    <p class="mb-0 font-20 text-white">Bienvenido(a) {{datos.nombres}}</p>
-                    <p class="text-white">En unos segundos te redireccionaremos para que accedas a nuestra platafoma</p>
-                </div>
-            </div>
-        </div>  -->
-
         <div class="row mx-0">
             <div class="col-md-6">
                 <div class="mx-5 ">
@@ -54,14 +35,14 @@
                                   <div class="col-md-6">
                                       <div class="form-group">
                                             <label for="">Apellido Paterno</label>
-                                            <input type="text" class="form-control" v-model.trim="datos.ap_paterno">
+                                            <input type="text" class="form-control" v-model.trim="datos.ap_paterno" @keypress="soloLetras">
                                             <small class="text-danger" v-if="mensajes.ap_paterno">{{mensajes.ap_paterno}}</small>
                                         </div> 
                                   </div>
                                   <div class="col-md-6">
                                       <div class="form-group">
                                             <label for="">Apellido Materno</label>
-                                            <input type="text" class="form-control" v-model.trim="datos.ap_materno">
+                                            <input type="text" class="form-control" v-model.trim="datos.ap_materno" @keypress="soloLetras">
                                             <small class="text-danger" v-if="mensajes.ap_materno">{{mensajes.ap_materno}}</small>
                                         </div>
                                   </div>
@@ -70,14 +51,14 @@
                                  <div class="col-md-6">
                                      <div class="form-group">
                                         <label for="">Nombre(s)</label>
-                                        <input type="text" class="form-control" v-model.trim="datos.nombres">
+                                        <input type="text" class="form-control" v-model.trim="datos.nombres" @keypress="soloLetras">
                                         <small class="text-danger" v-if="mensajes.nombres">{{mensajes.nombres}}</small>
                                     </div> 
                                  </div>
                                  <div class="col-md-6">
                                      <div class="form-group">
                                         <label for="">DNI</label>
-                                        <input type="text" class="form-control" v-model.number="datos.dni" maxlength="8" @keypress="soloNumeros" >
+                                        <input type="text" class="form-control" v-model="datos.dni" maxlength="8" @keypress="soloNumeros" >
                                         <small class="text-danger" v-if="mensajes.dni">{{mensajes.dni}}</small>
                                     </div>
                                  </div>
@@ -86,7 +67,7 @@
                                  <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="">Fecha de Nacimiento</label>
-                                        <input type="date" class="form-control" v-model="datos.fec_nac">
+                                        <input type="date" class="form-control" v-model="datos.fec_nac" min="1990-01-01">
                                         <small class="text-danger" v-if="mensajes.fec_nac">{{mensajes.fec_nac}}</small>
                                     </div>  
                                  </div>
@@ -210,7 +191,7 @@
                                  <div class="col-md-4">
                                       <div class="form-group">
                                             <label for="">Distrito</label>
-                                            <select title="Seleccionar" class="form-control" v-model="datos.v_dist">
+                                            <select title="Seleccionar" class="form-control" v-model="datos.v_dist" @change="listaMercados(datos.v_dist)">
                                                 <option value="">Seleccionar</option>
                                                 <option  v-for="(item, index) in distritos" :key="index" :value="item.id">{{item.dist}}</option>
                                             </select>
@@ -252,7 +233,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="">Descripción de Vendedor(a) (opcional)</label>
-                                <textarea class="form-control" rows="3" v-model.trim="datos.descripcion"></textarea>
+                                <textarea class="form-control" rows="3" v-model.trim="datos.descripcion" maxlength="255"></textarea>
+                                <small>Máx. 255 caractéres</small>
                                 <small class="text-danger" v-if="mensajes.descripcion">{{mensajes.descripcion}}</small>
                             </div> 
                             <a href="" @click.prevent="viewPanel2=true; viewPanel3=false" class="btn btn-white rounded shadow mt-2 px-3">Anterior</a>
@@ -357,28 +339,34 @@
         },
         created(){
             this.listDepartamentos();
-            this.listaMercados();
             this.listaCategorias();
         },
         methods:{
             continuar_1(){
                 this.limpiarMensajes();
-                if(this.datos.dni!="" && this.datos.ap_paterno!="" && this.datos.ap_materno!="" && this.datos.nombres!="" && this.datos.fec_nac!="" ){
-                    if((this.datos.dni).toString().length==8){
-                        this.viewPanel2=true; 
-                        this.viewPanel1=false;
+                if(this.datos.dni!="" && this.datos.ap_paterno!="" && this.datos.ap_materno!="" && this.datos.nombres!="" && this.datos.fec_nac!="" && this.datos.sexo!=""){
+                    if(((this.datos.dni).toString()).length==8){
+                        if(this.datos.fec_nac>="1990-01-01"){
+                            axios.get("validacion/validarDni/"+this.datos.dni).then(res=>{
+                                if(res.data){
+                                    const resp= res.data;
+                                    if(resp[0].cant==0){
+                                        this.viewPanel2=true; 
+                                        this.viewPanel1=false;
+                                    }else{
+                                        this.mensajes.dni="El DNI ingresado ya existe";
+                                    }
+                                }
+                            })
+                        }else{        
+                            this.mensajes.fec_nac="Fecha Mínima:1990-01-01"
+                        }
                     }else{
                         this.mensajes.dni="Este campo debe de contener 8 dígitos";
                     }
                 }else{
                     if(this.datos.dni==""){
                         this.mensajes.dni="Completar el campo";
-                    }else{
-                        if((this.datos.dni).toString().length==8){
-                            this.mensajes.dni="";
-                        }else{        
-                            this.mensajes.dni="Este campo debe de contener 8 dígitos";
-                        }
                     }
                     if(this.datos.nombres==""){
                         this.mensajes.nombres="Completar el campo"
@@ -443,8 +431,17 @@
                 this.limpiarMensajes();
                 if(this.datos.ruc!="" && this.datos.rubro!="" && this.datos.razon_social!="" && this.datos.v_dep!="" && this.datos.v_prov!="" && this.datos.v_dist!="" && this.datos.v_dir!="" && this.datos.centro_trab!=""){
                    if((this.datos.ruc).toString().length==11){
-                       this.viewPanel3=false; 
-                       this.viewPanel4=true;
+                       axios.get("validacion/validarRuc/"+this.datos.ruc).then(res=>{
+                            if(res.data){
+                                const resp= res.data;
+                                if(resp[0].cant==0){
+                                    this.viewPanel3=false; 
+                                    this.viewPanel4=true;
+                                }else{
+                                    this.mensajes.ruc="El RUC ingresado ya existe";
+                                }
+                            }
+                        })
                    }else{
                        this.mensajes.ruc="Este campo debe de contener 11 dígitos";
                    }
@@ -484,7 +481,7 @@
             continuar_4(){
                 this.limpiarMensajes();
                 if(this.datos.correo!="" && this.datos.contraseña!="" && this.datos.contraseña_dos!=""){
-                    if(this.datos.correo.indexOf("@")!=-1){
+                    if(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(this.datos.correo)){
                         if(this.datos.contraseña==this.datos.contraseña_dos){
                             this.viewPanel4=false;
                             this.viewPanel5=true;
@@ -550,8 +547,8 @@
                             num_tarjeta:'',
                             correo:'',contraseña:'',contraseña_dos:''};
             },
-            listaMercados(){
-                axios.get("mercados/listMercados").then(res=>{
+            listaMercados(dist){
+                axios.get("mercados/listMercados/"+dist).then(res=>{
                     if(res.data){
                         this.mercados= res.data;
                     }
@@ -576,6 +573,14 @@
                 var key = window.event ? e.which : e.keyCode;
                 if (key < 48 || key > 57) {
                     e.preventDefault();
+                }
+            },
+            soloLetras(e){
+                var regex = new RegExp("^[a-zA-Z ]+$");
+                var key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+                if (!regex.test(key)) {
+                    e.preventDefault();
+                    return false;
                 }
             }
         },

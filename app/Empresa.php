@@ -23,8 +23,20 @@ class Empresa extends Model
         return DB::select(DB::raw("
             select idEmpresa
             from empresa 
-            where RUC=:ruc
+            where
+                estado=0  
+            and RUC=:ruc
             and fechaAdd=:fec
         "),array("ruc"=>$ruc,"fec"=>$fecha));
+    }
+
+    public static function validarRuc($ruc){
+        return DB::select(DB::raw("
+            select count(*) as cant
+            from empresa 
+            where
+                estado=0 
+            and RUC=:ruc
+        "),array("ruc"=>$ruc));
     }
 }

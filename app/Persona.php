@@ -32,10 +32,23 @@ class Persona extends Model
         return DB::select(DB::raw("
             select idPersona
             from persona 
-            where DNI=:dni
+            where
+                estado=0 
+            and DNI=:dni
             and fecNac=:fn
             and fechaAdd=:fecAdd
         "),array("fn"=>$fecha_nacimiento,"dni"=>$dni,"fecAdd"=>$fecha));
+    
+    }
+
+    public static function validarDni($dni){
+        return DB::select(DB::raw("
+            select count(*) as cant
+            from persona 
+            where 
+                estado=0
+            and DNI=:dni
+        "),array("dni"=>$dni));
     
     }
 }

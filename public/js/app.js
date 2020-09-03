@@ -2522,24 +2522,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2616,29 +2598,38 @@ __webpack_require__.r(__webpack_exports__);
   },
   created: function created() {
     this.listDepartamentos();
-    this.listaMercados();
     this.listaCategorias();
   },
   methods: {
     continuar_1: function continuar_1() {
+      var _this = this;
+
       this.limpiarMensajes();
 
-      if (this.datos.dni != "" && this.datos.ap_paterno != "" && this.datos.ap_materno != "" && this.datos.nombres != "" && this.datos.fec_nac != "") {
+      if (this.datos.dni != "" && this.datos.ap_paterno != "" && this.datos.ap_materno != "" && this.datos.nombres != "" && this.datos.fec_nac != "" && this.datos.sexo != "") {
         if (this.datos.dni.toString().length == 8) {
-          this.viewPanel2 = true;
-          this.viewPanel1 = false;
+          if (this.datos.fec_nac >= "1990-01-01") {
+            axios.get("validacion/validarDni/" + this.datos.dni).then(function (res) {
+              if (res.data) {
+                var resp = res.data;
+
+                if (resp[0].cant == 0) {
+                  _this.viewPanel2 = true;
+                  _this.viewPanel1 = false;
+                } else {
+                  _this.mensajes.dni = "El DNI ingresado ya existe";
+                }
+              }
+            });
+          } else {
+            this.mensajes.fec_nac = "Fecha Mínima:1990-01-01";
+          }
         } else {
           this.mensajes.dni = "Este campo debe de contener 8 dígitos";
         }
       } else {
         if (this.datos.dni == "") {
           this.mensajes.dni = "Completar el campo";
-        } else {
-          if (this.datos.dni.toString().length == 8) {
-            this.mensajes.dni = "";
-          } else {
-            this.mensajes.dni = "Este campo debe de contener 8 dígitos";
-          }
         }
 
         if (this.datos.nombres == "") {
@@ -2710,12 +2701,24 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     continuar_3: function continuar_3() {
+      var _this2 = this;
+
       this.limpiarMensajes();
 
       if (this.datos.ruc != "" && this.datos.rubro != "" && this.datos.razon_social != "" && this.datos.v_dep != "" && this.datos.v_prov != "" && this.datos.v_dist != "" && this.datos.v_dir != "" && this.datos.centro_trab != "") {
         if (this.datos.ruc.toString().length == 11) {
-          this.viewPanel3 = false;
-          this.viewPanel4 = true;
+          axios.get("validacion/validarRuc/" + this.datos.ruc).then(function (res) {
+            if (res.data) {
+              var resp = res.data;
+
+              if (resp[0].cant == 0) {
+                _this2.viewPanel3 = false;
+                _this2.viewPanel4 = true;
+              } else {
+                _this2.mensajes.ruc = "El RUC ingresado ya existe";
+              }
+            }
+          });
         } else {
           this.mensajes.ruc = "Este campo debe de contener 11 dígitos";
         }
@@ -2763,7 +2766,7 @@ __webpack_require__.r(__webpack_exports__);
       this.limpiarMensajes();
 
       if (this.datos.correo != "" && this.datos.contraseña != "" && this.datos.contraseña_dos != "") {
-        if (this.datos.correo.indexOf("@") != -1) {
+        if (/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(this.datos.correo)) {
           if (this.datos.contraseña == this.datos.contraseña_dos) {
             this.viewPanel4 = false;
             this.viewPanel5 = true;
@@ -2788,7 +2791,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     registrar: function registrar() {
-      var _this = this;
+      var _this3 = this;
 
       this.limpiarMensajes();
       $('#modalCarga').modal({
@@ -2799,7 +2802,7 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.post("registro/insertProveedor", this.datos).then(function (res) {
         if (res.data == "ok") {
-          _this.viewCarga = false;
+          _this3.viewCarga = false;
           setTimeout(function () {
             window.location.href = "../login";
           }, 1500);
@@ -2807,31 +2810,31 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     listDepartamentos: function listDepartamentos() {
-      var _this2 = this;
+      var _this4 = this;
 
       axios.get("ubigeo/departamentos").then(function (res) {
         if (res.data) {
-          _this2.departamentos = res.data;
+          _this4.departamentos = res.data;
         }
       });
     },
     listProvincias: function listProvincias(id) {
-      var _this3 = this;
+      var _this5 = this;
 
       this.provincias = "";
       this.distritos = "";
       axios.get("ubigeo/provincias/" + id).then(function (res) {
         if (res.data) {
-          _this3.provincias = res.data;
+          _this5.provincias = res.data;
         }
       });
     },
     listDistrito: function listDistrito(id) {
-      var _this4 = this;
+      var _this6 = this;
 
       axios.get("ubigeo/distritos/" + id).then(function (res) {
         if (res.data) {
-          _this4.distritos = res.data;
+          _this6.distritos = res.data;
         }
       });
     },
@@ -2862,31 +2865,31 @@ __webpack_require__.r(__webpack_exports__);
         contraseña_dos: ''
       };
     },
-    listaMercados: function listaMercados() {
-      var _this5 = this;
+    listaMercados: function listaMercados(dist) {
+      var _this7 = this;
 
-      axios.get("mercados/listMercados").then(function (res) {
+      axios.get("mercados/listMercados/" + dist).then(function (res) {
         if (res.data) {
-          _this5.mercados = res.data;
+          _this7.mercados = res.data;
         }
       });
     },
     listaSectoresMercados: function listaSectoresMercados(idmercado) {
-      var _this6 = this;
+      var _this8 = this;
 
       this.mercados_sectores = [];
       axios.get("mercados/listSectoresMercados/" + idmercado).then(function (res) {
         if (res.data) {
-          _this6.mercados_sectores = res.data;
+          _this8.mercados_sectores = res.data;
         }
       });
     },
     listaCategorias: function listaCategorias() {
-      var _this7 = this;
+      var _this9 = this;
 
       axios.get("categorias/listCategorias").then(function (res) {
         if (res.data) {
-          _this7.categorias = res.data;
+          _this9.categorias = res.data;
         }
       });
     },
@@ -2895,6 +2898,15 @@ __webpack_require__.r(__webpack_exports__);
 
       if (key < 48 || key > 57) {
         e.preventDefault();
+      }
+    },
+    soloLetras: function soloLetras(e) {
+      var regex = new RegExp("^[a-zA-Z ]+$");
+      var key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+
+      if (!regex.test(key)) {
+        e.preventDefault();
+        return false;
       }
     }
   },
@@ -39298,6 +39310,7 @@ var render = function() {
                             attrs: { type: "text" },
                             domProps: { value: _vm.datos.ap_paterno },
                             on: {
+                              keypress: _vm.soloLetras,
                               input: function($event) {
                                 if ($event.target.composing) {
                                   return
@@ -39342,6 +39355,7 @@ var render = function() {
                             attrs: { type: "text" },
                             domProps: { value: _vm.datos.ap_materno },
                             on: {
+                              keypress: _vm.soloLetras,
                               input: function($event) {
                                 if ($event.target.composing) {
                                   return
@@ -39388,6 +39402,7 @@ var render = function() {
                             attrs: { type: "text" },
                             domProps: { value: _vm.datos.nombres },
                             on: {
+                              keypress: _vm.soloLetras,
                               input: function($event) {
                                 if ($event.target.composing) {
                                   return
@@ -39420,10 +39435,9 @@ var render = function() {
                             directives: [
                               {
                                 name: "model",
-                                rawName: "v-model.number",
+                                rawName: "v-model",
                                 value: _vm.datos.dni,
-                                expression: "datos.dni",
-                                modifiers: { number: true }
+                                expression: "datos.dni"
                               }
                             ],
                             staticClass: "form-control",
@@ -39435,14 +39449,7 @@ var render = function() {
                                 if ($event.target.composing) {
                                   return
                                 }
-                                _vm.$set(
-                                  _vm.datos,
-                                  "dni",
-                                  _vm._n($event.target.value)
-                                )
-                              },
-                              blur: function($event) {
-                                return _vm.$forceUpdate()
+                                _vm.$set(_vm.datos, "dni", $event.target.value)
                               }
                             }
                           }),
@@ -39473,7 +39480,7 @@ var render = function() {
                               }
                             ],
                             staticClass: "form-control",
-                            attrs: { type: "date" },
+                            attrs: { type: "date", min: "1990-01-01" },
                             domProps: { value: _vm.datos.fec_nac },
                             on: {
                               input: function($event) {
@@ -40235,24 +40242,29 @@ var render = function() {
                               staticClass: "form-control",
                               attrs: { title: "Seleccionar" },
                               on: {
-                                change: function($event) {
-                                  var $$selectedVal = Array.prototype.filter
-                                    .call($event.target.options, function(o) {
-                                      return o.selected
-                                    })
-                                    .map(function(o) {
-                                      var val =
-                                        "_value" in o ? o._value : o.value
-                                      return val
-                                    })
-                                  _vm.$set(
-                                    _vm.datos,
-                                    "v_dist",
-                                    $event.target.multiple
-                                      ? $$selectedVal
-                                      : $$selectedVal[0]
-                                  )
-                                }
+                                change: [
+                                  function($event) {
+                                    var $$selectedVal = Array.prototype.filter
+                                      .call($event.target.options, function(o) {
+                                        return o.selected
+                                      })
+                                      .map(function(o) {
+                                        var val =
+                                          "_value" in o ? o._value : o.value
+                                        return val
+                                      })
+                                    _vm.$set(
+                                      _vm.datos,
+                                      "v_dist",
+                                      $event.target.multiple
+                                        ? $$selectedVal
+                                        : $$selectedVal[0]
+                                    )
+                                  },
+                                  function($event) {
+                                    return _vm.listaMercados(_vm.datos.v_dist)
+                                  }
+                                ]
                               }
                             },
                             [
@@ -40531,7 +40543,7 @@ var render = function() {
                           }
                         ],
                         staticClass: "form-control",
-                        attrs: { rows: "3" },
+                        attrs: { rows: "3", maxlength: "255" },
                         domProps: { value: _vm.datos.descripcion },
                         on: {
                           input: function($event) {
@@ -40549,6 +40561,8 @@ var render = function() {
                           }
                         }
                       }),
+                      _vm._v(" "),
+                      _c("small", [_vm._v("Máx. 255 caractéres")]),
                       _vm._v(" "),
                       _vm.mensajes.descripcion
                         ? _c("small", { staticClass: "text-danger" }, [

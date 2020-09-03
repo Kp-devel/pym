@@ -8,14 +8,15 @@ use Illuminate\Http\Request;
 
 class Mercado extends Model
 {
-    public static function listMercados(){
+    public static function listMercados($dist){
         return DB::select(DB::raw("
             SELECT
                 idMercado as id,
                 nombreMercado as mercado         
             FROM mercado 
             WHERE estado=0
-        "));
+            and idDist_Fk=:dist
+        "),array("dist"=>$dist));
     }
 
     public static function listSectoresMercados($id){
