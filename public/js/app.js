@@ -2522,6 +2522,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -2540,6 +2545,8 @@ __webpack_require__.r(__webpack_exports__);
       mercados_sectores: [],
       categorias: [],
       cont: 0,
+      longPass: 0,
+      catPass: '',
       mensajes: {
         dni: '',
         nombres: '',
@@ -2608,7 +2615,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.datos.dni != "" && this.datos.ap_paterno != "" && this.datos.ap_materno != "" && this.datos.nombres != "" && this.datos.fec_nac != "" && this.datos.sexo != "") {
         if (this.datos.dni.toString().length == 8) {
-          if (this.datos.fec_nac >= "1990-01-01") {
+          if (this.datos.fec_nac >= "1900-01-01") {
             axios.get("validacion/validarDni/" + this.datos.dni).then(function (res) {
               if (res.data) {
                 var resp = res.data;
@@ -2622,7 +2629,7 @@ __webpack_require__.r(__webpack_exports__);
               }
             });
           } else {
-            this.mensajes.fec_nac = "Fecha Mínima:1990-01-01";
+            this.mensajes.fec_nac = "Fecha Mínima:1900-01-01";
           }
         } else {
           this.mensajes.dni = "Este campo debe de contener 8 dígitos";
@@ -2901,12 +2908,34 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     soloLetras: function soloLetras(e) {
-      var regex = new RegExp("^[a-zA-Z ]+$");
+      var regex = new RegExp("^[a-zA-Z ÁÉÍÓÚáéíóú]+$");
       var key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
 
       if (!regex.test(key)) {
         e.preventDefault();
         return false;
+      }
+    },
+    validacionPass: function validacionPass() {
+      var caracteres_especiales = '-*?!¿¡@#$/(){}=.,;:';
+      var longPass = this.datos.contraseña.length;
+
+      if (longPass < 8) {
+        this.catPass = 'Baja';
+      }
+
+      if (longPass >= 8) {
+        this.catPass = 'Media';
+      }
+
+      if (longPass >= 8) {
+        for (var i = 0; i < longPass; i++) {
+          console.log(this.datos.contraseña.charAt(i));
+
+          if (caracteres_especiales.indexOf(this.datos.contraseña.charAt(i)) >= 0) {
+            this.catPass = 'Alta';
+          }
+        }
       }
     }
   },
@@ -39557,7 +39586,7 @@ var render = function() {
                             ]
                           ),
                           _vm._v(" "),
-                          _vm.mensajes.dni
+                          _vm.mensajes.sexo
                             ? _c("small", { staticClass: "text-danger" }, [
                                 _vm._v(_vm._s(_vm.mensajes.sexo))
                               ])
@@ -40692,6 +40721,9 @@ var render = function() {
                           },
                           domProps: { value: _vm.datos.contraseña },
                           on: {
+                            keyup: function($event) {
+                              return _vm.validacionPass()
+                            },
                             input: function($event) {
                               if ($event.target.composing) {
                                 return
@@ -40708,6 +40740,58 @@ var render = function() {
                           }
                         })
                       ]),
+                      _vm._v(" "),
+                      _vm.datos.contraseña != ""
+                        ? _c(
+                            "div",
+                            {
+                              staticClass: "progress",
+                              staticStyle: { height: "5px" }
+                            },
+                            [
+                              _vm.catPass == "Baja" ||
+                              _vm.catPass == "Media" ||
+                              _vm.catPass == "Alta"
+                                ? _c("div", {
+                                    staticClass: "progress-bar bg-danger",
+                                    staticStyle: { width: "33.3%" },
+                                    attrs: {
+                                      role: "progressbar",
+                                      "aria-valuenow": "33.3",
+                                      "aria-valuemin": "0",
+                                      "aria-valuemax": "100"
+                                    }
+                                  })
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _vm.catPass == "Media" || _vm.catPass == "Alta"
+                                ? _c("div", {
+                                    staticClass: "progress-bar bg-warning",
+                                    staticStyle: { width: "33.3%" },
+                                    attrs: {
+                                      role: "progressbar",
+                                      "aria-valuenow": "33.3",
+                                      "aria-valuemin": "0",
+                                      "aria-valuemax": "100"
+                                    }
+                                  })
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _vm.catPass == "Alta"
+                                ? _c("div", {
+                                    staticClass: "progress-bar bg-success",
+                                    staticStyle: { width: "33.4%" },
+                                    attrs: {
+                                      role: "progressbar",
+                                      "aria-valuenow": "33.4",
+                                      "aria-valuemin": "0",
+                                      "aria-valuemax": "100"
+                                    }
+                                  })
+                                : _vm._e()
+                            ]
+                          )
+                        : _vm._e(),
                       _vm._v(" "),
                       _vm.mensajes.contraseña
                         ? _c("small", { staticClass: "text-danger" }, [

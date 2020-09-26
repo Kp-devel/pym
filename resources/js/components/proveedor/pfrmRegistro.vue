@@ -79,7 +79,7 @@
                                             <option value="1">Mujer</option>
                                             <option value="2">Hombre</option>
                                         </select>
-                                        <small class="text-danger" v-if="mensajes.dni">{{mensajes.sexo}}</small>
+                                        <small class="text-danger" v-if="mensajes.sexo">{{mensajes.sexo}}</small>
                                     </div>
                                  </div>
                              </div>
@@ -260,7 +260,12 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="basic-addon1">**</span>
                                     </div>
-                                    <input type="password" class="form-control" aria-label="Username" aria-describedby="basic-addon1" v-model.trim="datos.contraseña">
+                                    <input type="password" class="form-control" aria-label="Username" aria-describedby="basic-addon1" v-model.trim="datos.contraseña" @keyup="validacionPass()">
+                                </div>
+                                <div class="progress" v-if="datos.contraseña!=''" style="height:5px">
+                                    <div v-if="catPass=='Baja' || catPass=='Media' || catPass=='Alta'" class="progress-bar bg-danger" role="progressbar" style="width: 33.3%" aria-valuenow="33.3" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div v-if="catPass=='Media' || catPass=='Alta'" class="progress-bar bg-warning" role="progressbar" style="width: 33.3%" aria-valuenow="33.3" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div v-if="catPass=='Alta'" class="progress-bar bg-success" role="progressbar" style="width: 33.4%" aria-valuenow="33.4" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 <small class="text-danger" v-if="mensajes.contraseña">{{mensajes.contraseña}}</small>
                             </div>
@@ -325,6 +330,8 @@
                 mercados_sectores:[],
                 categorias:[],
                 cont:0,
+                longPass:0,
+                catPass:'',
                 mensajes:{dni:'',nombres:'',ap_paterno:'',ap_materno:'',fec_nac:'',sexo:'',
                             dep:'',prov:'',dist:'',dir:'',telf:'',
                             ruc:'',rubro:'',razon_social:'',v_dep:'',v_prov:'',v_dist:'',v_dir:'',v_referencia:'',centro_trab:'',descripcion:'',
@@ -346,7 +353,7 @@
                 this.limpiarMensajes();
                 if(this.datos.dni!="" && this.datos.ap_paterno!="" && this.datos.ap_materno!="" && this.datos.nombres!="" && this.datos.fec_nac!="" && this.datos.sexo!=""){
                     if(((this.datos.dni).toString()).length==8){
-                        if(this.datos.fec_nac>="1990-01-01"){
+                        if(this.datos.fec_nac>="1900-01-01"){
                             axios.get("validacion/validarDni/"+this.datos.dni).then(res=>{
                                 if(res.data){
                                     const resp= res.data;
@@ -359,7 +366,7 @@
                                 }
                             })
                         }else{        
-                            this.mensajes.fec_nac="Fecha Mínima:1990-01-01"
+                            this.mensajes.fec_nac="Fecha Mínima:1900-01-01"
                         }
                     }else{
                         this.mensajes.dni="Este campo debe de contener 8 dígitos";
@@ -576,12 +583,32 @@
                 }
             },
             soloLetras(e){
-                var regex = new RegExp("^[a-zA-Z ]+$");
+                var regex = new RegExp("^[a-zA-Z ÁÉÍÓÚáéíóú]+$");
                 var key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
                 if (!regex.test(key)) {
                     e.preventDefault();
                     return false;
                 }
+            },
+            validacionPass(){
+                var caracteres_especiales='-*?!¿¡@#$/(){}=.,;:';
+                var longPass=this.datos.contraseña.length;
+                
+                if(longPass<8){
+                    this.catPass='Baja';
+                }
+                if(longPass>=8){
+                    this.catPass='Media';
+                }
+                if(longPass>=8){
+                    for(var i=0;i<longPass;i++){
+                        console.log((this.datos.contraseña).charAt(i));
+                         if(caracteres_especiales.indexOf((this.datos.contraseña).charAt(i))>=0){
+                            this.catPass='Alta';
+                        }
+                    }
+                }
+                
             }
         },
         updated(){
